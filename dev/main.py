@@ -1,23 +1,20 @@
-from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
-from aiogram.filters import CommandStart
+from aiogram import Bot, Dispatcher
 import asyncio
 import os
+import openai
+from app.handlers import router
+from aiogram.fsm.storage.memory import MemoryStorage
 
 token = os.environ.get("TELEGRAM_BOT_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+openai.api_key = OPENAI_API_KEY
 
 bot = Bot(token=token)
-dp = Dispatcher()
+dp = Dispatcher(storage=MemoryStorage())
 
-@dp.message(CommandStart())
-async def start(message: Message):
-    await message.answer("Привет от Платона через Docker!")
-
-@dp.message(F.text == '!анекдот')
-async def joke(message: Message):
-    await message.answer('шутка из бд')
 
 async def main():
+    dp.include_router(router)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
