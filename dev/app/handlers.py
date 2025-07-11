@@ -16,9 +16,9 @@ gpt_active_by_chat_id = {}
 
 @router.message(CommandStart())
 async def start(message: Message):
-    await message.answer("бра здоров, я в групах такие каманды выполняю:\n!пук\n!каки")
+    await message.answer("бра здоров, я в групах такие каманды выполняю:\n!фото\n!шутка")
 
-@router.message(F.text == '!пук')
+@router.message(F.text == '!шутка')
 async def joke(message: Message):
     conn = sqlite3.connect(db_path_joke)
     cursor = conn.cursor()
@@ -30,7 +30,7 @@ async def joke(message: Message):
     else:
         await message.answer("нет")
 
-@router.message(F.text == '!каки')
+@router.message(F.text == '!фото')
 async def photo(message: Message):
     conn = sqlite3.connect(db_path_photo)
     cursor = conn.cursor()
