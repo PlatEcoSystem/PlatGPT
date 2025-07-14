@@ -14,21 +14,26 @@ router=Router()
 
 gpt_active_by_chat_id = {}
 
+def get_random_joke():
+    conn = sqlite3.connect(db_path_joke)
+    cursor = conn.cursor()
+    cursor.execute("SELECT question, answer FROM jokes ORDER BY RANDOM() LIMIT 1;")
+    result = cursor.fetchone()
+    conn.close()
+    return result if result else ("— Шутка не найдена", "— Без punchline :(")
+
 @router.message(CommandStart())
 async def start(message: Message):
     await message.answer("бра здоров, я в групах такие каманды выполняю:\n!фото\n!шутка")
 
-@router.message(F.text == '!шутка')
-async def joke(message: Message):
-    conn = sqlite3.connect(db_path_joke)
-    cursor = conn.cursor()
-    cursor.execute("SELECT text FROM jokes ORDER BY RANDOM() LIMIT 1")
-    joke = cursor.fetchone()
-    conn.close()
-    if joke:
-        await message.answer(joke[0])
-    else:
-        await message.answer("нет")
+
+@router.message(F.text == "!шутка")
+async def joke_handler(message: Message):
+    question, answer = get_random_joke()
+
+    await message.answer(question)  # отправляем шутку
+    await asyncio.sleep(10)  # ждём 10 секунд
+    await message.answer(answer)
 
 @router.message(F.text == '!фото')
 async def photo(message: Message):
@@ -42,7 +47,7 @@ async def photo(message: Message):
     else:
         await message.answer("нет")
 
-# Команда "!го" — включить GPT
+
 @router.message(F.text.lower() == "!го")
 async def enable_gpt(message: Message):
     gpt_active_by_chat_id[message.chat.id] = True
@@ -58,7 +63,7 @@ async def call_gpt_async(user_input: str) -> str:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Ты Платон — ироничный и саркастичный подросток."},
+                {"role": "system", "content": ""},
                 {"role": "user", "content": user_input}
             ]
         )
