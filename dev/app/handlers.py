@@ -7,7 +7,7 @@ import openai
 import asyncio
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sql_path_joke = os.path.join(BASE_DIR, "data-prep", "processed", "jokes_dump.sql")
+db_path_joke = os.path.join(BASE_DIR, "data-prep", "processed", "jokes.db")
 db_path_photo = os.path.join(BASE_DIR, "data-prep", "processed", "images.db")
 
 router=Router()
@@ -15,19 +15,15 @@ router=Router()
 gpt_active_by_chat_id = {}
 
 
-def get_random_joke_from_sql(sql_path: str) -> tuple[str, str]:
-    # Создаём временную SQLite-базу в памяти
-    conn = sqlite3.connect(":memory:")
+def get_random_joke(db_path=db_path_joke):
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    # Загружаем SQL-дамп и исполняем
-    with open(sql_path_joke, 'r', encoding='utf-16') as f:
-        sql_script = f.read()
-    cursor.executescript(sql_script)
-    # Получаем случайную шутку
+
     cursor.execute("SELECT question, answer FROM jokes ORDER BY RANDOM() LIMIT 1;")
     result = cursor.fetchone()
+
     conn.close()
-    return result if result else ("Шутка не найдена", "Punchline отсутствует")
+    return result
 
 @router.message(CommandStart())
 async def start(message: Message):
@@ -36,7 +32,7 @@ async def start(message: Message):
 
 @router.message(F.text == "!шутка")
 async def joke_handler(message: Message):
-    question, answer = get_random_joke_from_sql("jokes_dump.sql")
+    question, answer = get_random_joke()
 
     await message.answer(question)  # отправляем шутку
     await asyncio.sleep(10)  # ждём 10 секунд
