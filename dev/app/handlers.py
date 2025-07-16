@@ -35,7 +35,7 @@ async def joke_handler(message: Message):
     question, answer = get_random_joke()
 
     await message.answer(question)  # отправляем шутку
-    await asyncio.sleep(10)  # ждём 10 секунд
+    await asyncio.sleep(5)  # ждём 10 секунд
     await message.answer(answer)
 
 @router.message(F.text == '!фото')
