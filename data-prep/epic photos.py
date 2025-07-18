@@ -1,0 +1,30 @@
+import sqlite3
+import os
+from pathlib import Path
+def create_db():
+    conn = sqlite3.connect("photos.db")
+    cursor = conn.cursor()
+    cursor.execute('CREATE TABLE IF NOT EXISTS photos (file_path TEXT UNIQUE)')
+    conn.commit()
+    conn.close()
+def add_photo(file_path: str):
+    conn = sqlite3.connect("photos.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO photos (file_path) VALUES(?)", (file_path,))
+    conn.commit()
+    conn.close()
+create_db()
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-33-38.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-33-53.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-34-08.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-34-12.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-34-21.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-34-49.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-35-40.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-35-46.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-35-55.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-36-25.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-36-57.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-37-15.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-37-20.jpg")
+add_photo("C:/Users/asus/Downloads/Telegram Desktop/photo_2025-07-16_20-37-33.jpg")
