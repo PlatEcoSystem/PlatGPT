@@ -1,10 +1,11 @@
-from aiogram import F, Router, types
-from aiogram.types import Message
+from aiogram import F, Router
+from aiogram.types import Message, FSInputFile
 from aiogram.filters import CommandStart
-import sqlite3
 import os
 import openai
 import asyncio
+from .db_rebuild import rebuild_jokes_db, rebuild_images_db
+from .get_db import get_random_joke, get_random_photo
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 db_path_joke = os.path.join(BASE_DIR, "data-prep", "processed", "jokes.db")
@@ -14,49 +15,38 @@ router=Router()
 
 gpt_active_by_chat_id = {}
 
-
-def get_random_joke(db_path=db_path_joke):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT question, answer FROM jokes ORDER BY RANDOM() LIMIT 1;")
-    result = cursor.fetchone()
-
-    conn.close()
-    return result
+rebuild_jokes_db()
+rebuild_images_db()
 
 @router.message(CommandStart())
 async def start(message: Message):
     await message.answer("бра здоров, я в групах такие каманды выполняю:\n!фото\n!шутка")
 
 
-@router.message(F.text == "!шутка")
+@router.message(F.text == "!ПУК")
 async def joke_handler(message: Message):
-    question, answer = get_random_joke()
+    question, answer = get_random_joke(db_path_joke)
 
     await message.answer(question)  # отправляем шутку
     await asyncio.sleep(5)  # ждём 10 секунд
     await message.answer(answer)
 
-@router.message(F.text == '!фото')
+
+@router.message(F.text == '!БРА')
 async def photo(message: Message):
-    conn = sqlite3.connect(db_path_photo)
-    cursor = conn.cursor()
-    cursor.execute("SELECT image FROM file_path ORDER BY RANDOM() LIMIT 1")
-    photo = cursor.fetchone()
-    conn.close()
-    if photo:
-        await message.answer(photo[0])
-    else:
-        await message.answer("нет")
+    filename = get_random_photo(db_path_photo)  # "photo_2025.jpg"
+    photo_path = f"./dev/photos/{filename}"
+
+    photo = FSInputFile(photo_path)  # <-- Вот так создаём файл
+    await message.answer_photo(photo)
 
 
-@router.message(F.text.lower() == "!го")
+@router.message(F.text.lower() == "!Z")
 async def enable_gpt(message: Message):
     gpt_active_by_chat_id[message.chat.id] = True
     await message.reply("GPT включён 🤖")
 
-@router.message(F.text.lower() == "!пока")
+@router.message(F.text.lower() == "!V")
 async def disable_gpt(message: Message):
     gpt_active_by_chat_id[message.chat.id] = False
     await message.reply("GPT отключён 💤")
