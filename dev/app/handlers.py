@@ -8,7 +8,7 @@ import asyncio
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 db_path_joke = os.path.join(BASE_DIR, "data-prep", "processed", "jokes.db")
-db_path_photo = os.path.join(BASE_DIR, "data-prep", "processed", "images.db")
+db_path_photo = os.path.join(BASE_DIR, "data-prep", "processed", "photos.db")
 
 router=Router()
 
@@ -42,7 +42,7 @@ async def joke_handler(message: Message):
 async def photo(message: Message):
     conn = sqlite3.connect(db_path_photo)
     cursor = conn.cursor()
-    cursor.execute("SELECT url FROM images ORDER BY RANDOM() LIMIT 1")
+    cursor.execute("SELECT image FROM file_path ORDER BY RANDOM() LIMIT 1")
     photo = cursor.fetchone()
     conn.close()
     if photo:
